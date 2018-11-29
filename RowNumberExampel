@@ -1,0 +1,27 @@
+  DECLARE @TEST TABLE (ID INT IDENTITY(1,1), NAME VARCHAR(100),BNO INT,BW DECIMAL(4,2))
+  INSERT INTO @TEST
+  SELECT 'GD',1,1.2
+  UNION ALL
+  SELECT 'DD',1,1.2
+  UNION ALL
+  SELECT 'DK',2,2.1
+  UNION ALL
+  SELECT 'SK',3,2.2
+  UNION ALL
+  SELECT 'SKK',3,2.2
+
+ SELECT ID,NAME,BNO,BW  FROM @TEST T
+;WITH summary AS (
+    SELECT p.id, 
+           p.NAME, 
+           p.BNO, 
+		   P.BW,
+           ROW_NUMBER() OVER(PARTITION BY p.BNO
+		                                    ORDER BY p.ID ) AS rk
+      FROM @TEST p)
+UPDATE @TEST 
+SET BW=0
+WHERE ID IN(SELECT s.ID
+  FROM summary s
+ WHERE s.rk != 1)
+ SELECT * FROM @TEST
